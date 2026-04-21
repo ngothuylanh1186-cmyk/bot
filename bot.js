@@ -1,28 +1,50 @@
 const mineflayer = require('mineflayer')
 
-const bot = mineflayer.createBot({
-  host: 'aechatsmp.sdlf.fun',      // IP server của bạn
-  port: 25565,            // Port server (mặc định 25565)
-  username: 'MyBot',      // Tên bot
-  version: '1.21.11',     // Phiên bản server
-  // auth: 'microsoft',   // Bỏ comment nếu server online mode
-})
+function createBot() {
+  const bot = mineflayer.createBot({
+    host: 'aechatsmp.sdlf.fun',
+    port: 25565,
+    username: 'MyBot',
+    version: '1.21.11',
+    // auth: 'microsoft',
+  })
 
-// Khi bot vào server thành công
-bot.once('spawn', () => {
-  console.log('✅ Bot đã vào server thành công!')
-  bot.chat('Xin chào mọi người!') // Bot chat khi vào
-})
+  // ✅ Khi bot vào server thành công
+  bot.once('spawn', () => {
+    console.log('✅ Bot đã vào server thành công!')
+    bot.chat('Xin chào mọi người!')
 
-// Khi bị kick hoặc lỗi
-bot.on('kicked', (reason) => {
-  console.log('❌ Bị kick:', reason)
-})
+    // 🔄 Chống AFK - nhảy mỗi 4 phút
+    const antiAFK = setInterval(() => {
+      if (bot.entity) {
+        bot.setControlState('jump', true)
+        setTimeout(() => bot.setControlState('jump', false), 500)
+        console.log('🦘 Anti-AFK: Bot đã nhảy!')
+      }
+    }, 4 * 60 * 1000)
 
-bot.on('error', (err) => {
-  console.log('⚠️ Lỗi:', err)
-})
+    // Dọn interval khi bot disconnect
+    bot.once('end', () => clearInterval(antiAFK))
+  })
 
-bot.on('end', () => {
-  console.log('🔴 Bot đã disconnect')
-})
+  // ❌ Khi bị kick
+  bot.on('kicked', (reason) => {
+    console.log('❌ Bị kick:', reason)
+  })
+
+  // ⚠️ Lỗi
+  bot.on('error', (err) => {
+    console.log('⚠️ Lỗi:', err.message)
+  })
+
+  // 🔴 Khi disconnect -> tự reconnect sau 10 giây
+  bot.on('end', () => {
+    console.log('🔴 Bot đã disconnect. Reconnect sau 10 giây...')
+    setTimeout(() => {
+      console.log('🔁 Đang reconnect...')
+      createBot()
+    }, 10 * 1000)
+  })
+}
+
+createBot()
