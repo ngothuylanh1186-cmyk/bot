@@ -2,8 +2,8 @@ const mineflayer = require('mineflayer')
 
 function createBot() {
   const bot = mineflayer.createBot({
-    host: 'aechatsmp.sdlf.fun',
-    port: 25565,
+    host: 'aechatsmp.progamer.me',
+    port: 41679,
     username: 'MyBot',
     version: '1.21.11',
     // auth: 'microsoft',
